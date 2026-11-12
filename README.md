@@ -1,13 +1,22 @@
 # Android Ports BR
 
+[![Build APK](https://github.com/deivid22srk/android-ports-br/actions/workflows/build.yml/badge.svg)](https://github.com/deivid22srk/android-ports-br/actions/workflows/build.yml)
+
 Feed de notícias em tela cheia, com swipe vertical estilo TikTok/Kwai, para a comunidade brasileira de ports, custom ROMs, modding, apps e lançamentos. Visual **Nothing OS × Apple**: preto OLED, um único vermelho (`#D71921`), tipografia dot-matrix pontual, vidro translúcido e molas.
 
 > **Conteúdo de demonstração:** `server/data/seed.json` e `app/src/main/assets/seed_news.json` trazem 32 notícias escritas para o projeto. Os links apontam para as fontes, sem republicar artigos completos. O servidor também agrega feeds RSS reais configurados em `server/sources.json`.
+
+## Download
+
+- **APK assinado:** [Releases](https://github.com/deivid22srk/android-ports-br/releases/latest) (`Android-Ports-BR-1.0.0.apk`, 2,1 MB).
+- **Artefato do CI:** [Actions · Build APK](https://github.com/deivid22srk/android-ports-br/actions/workflows/build.yml) → `android-ports-br-apk`.
+- **Código do servidor:** pasta [`server/`](server/) (Node.js 20+).
 
 ---
 
 ## Sumário
 
+- [Download](#download)
 - [Funcionalidades](#funcionalidades)
 - [Stack e arquitetura](#stack-e-arquitetura)
 - [Design system](#design-system)
@@ -196,8 +205,8 @@ Metas e o que já está implementado:
 
 | Métrica | Resultado |
 |---|---|
-| APK release assinado | **preencher após o primeiro build verde do CI** |
-| Tempo do workflow | **preencher após o primeiro build verde do CI** |
+| APK release assinado | **2,1 MB** (2.154.091 bytes), ABIs `arm64-v8a` e `armeabi-v7a` |
+| Tempo do workflow | **~2 min 25 s** no GitHub Actions (run 43222285139) |
 | `dumpsys gfxinfo` (frames lentos) | Não medido neste ambiente (sem dispositivo/emulador Android). |
 | Tempo de inicialização | Não medido neste ambiente. |
 
@@ -210,7 +219,7 @@ adb shell dumpsys gfxinfo br.androidports reset
 adb shell dumpsys gfxinfo br.androidports
 ```
 
-Alvos: < 1% de frames lentos, startup < 800 ms em aparelho intermediário, APK release ~10 MB.
+Alvos: < 1% de frames lentos, startup < 800 ms em aparelho intermediário. O APK release ficou em **2,1 MB**, bem abaixo da meta de ~10 MB, graças ao R8 full mode, ao resource shrinking e a uma única DEX.
 
 ## Estrutura
 
