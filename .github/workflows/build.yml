@@ -1,0 +1,99 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platforms;android-35 build-tools;34.0.0 build-tools;35.0.0"
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Prepare CI signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD_SECRET: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS_SECRET: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD_SECRET: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -n "${KEYSTORE_BASE64:-}" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > ci-release.jks
+            echo "CI_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD_SECRET" >> "$GITHUB_ENV"
+            echo "CI_KEY_ALIAS=${KEY_ALIAS_SECRET:-androidports}" >> "$GITHUB_ENV"
+            echo "CI_KEY_PASSWORD=$KEY_PASSWORD_SECRET" >> "$GITHUB_ENV"
+          else
+            PASSWORD="$(openssl rand -hex 20)"
+            keytool -genkeypair -v \
+              -keystore ci-release.jks \
+              -alias androidports \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$PASSWORD" -keypass "$PASSWORD" \
+              -dname "CN=Android Ports BR, OU=CI, O=AndroidPortsBR, L=Sao Paulo, ST=SP, C=BR"
+            echo "CI_KEYSTORE_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+            echo "CI_KEY_ALIAS=androidports" >> "$GITHUB_ENV"
+            echo "CI_KEY_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+          fi
+          echo "CI_KEYSTORE_FILE=$GITHUB_WORKSPACE/ci-release.jks" >> "$GITHUB_ENV"
+
+      - name: Build release
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: |
+          set -euo pipefail
+          VERSION="$(jq -r '.elements[0].versionName' app/build/outputs/apk/release/output-metadata.json)"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk "dist/Android-Ports-BR-${VERSION}.apk"
+          echo "APK_VERSION=$VERSION" >> "$GITHUB_ENV"
+          ls -lh dist
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-ports-br-apk
+          path: dist/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/*.apk \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "Android Ports BR ${GITHUB_REF_NAME}" \
+            --notes "APK release assinado, gerado automaticamente pelo workflow Build APK (versão ${APK_VERSION})."

@@ -1,0 +1,30 @@
+{
+  "refreshMinutes": 15,
+  "sources": [
+    {
+      "name": "Tecnoblog",
+      "feed": "https://tecnoblog.net/feed/",
+      "defaultCategory": "lancamentos"
+    },
+    {
+      "name": "XDA Developers",
+      "feed": "https://www.xda-developers.com/feed/",
+      "defaultCategory": "dicas"
+    },
+    {
+      "name": "Android Authority",
+      "feed": "https://www.androidauthority.com/feed/",
+      "defaultCategory": "lancamentos"
+    },
+    {
+      "name": "Android Police",
+      "feed": "https://www.androidpolice.com/feed/",
+      "defaultCategory": "apps"
+    },
+    {
+      "name": "9to5Google",
+      "feed": "https://9to5google.com/feed/",
+      "defaultCategory": "lancamentos"
+    }
+  ]
+}

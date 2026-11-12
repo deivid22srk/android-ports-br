@@ -1,0 +1,27 @@
+# Gradle / Android
+.gradle/
+build/
+*/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.idea/
+.kotlin/
+
+# Assinatura e segredos
+*.jks
+*.keystore
+ci-release.jks
+keystore.properties
+
+# Node
+server/node_modules/
+server/data/cache.json
+npm-debug.log*
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.hprof

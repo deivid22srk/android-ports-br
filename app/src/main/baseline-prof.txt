@@ -1,0 +1,3 @@
+HSPLbr/androidports/PortsApplication;->onCreate()V
+HSPLbr/androidports/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLbr/androidports/ui/feed/FeedViewModel;-><init>(Lbr/androidports/data/repository/NewsRepository;Lbr/androidports/domain/FeedFilter;)V

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Android Ports BR</string>
+    <string name="app_tagline">Notícias de ports, ROMs e modding</string>
+    <string name="channel_news">Notícias</string>
+</resources>
